@@ -18,41 +18,47 @@ function addWord() {
     var feedback = document.getElementById('feedback');
     var li = document.createElement('li');
     
-    if (word !== ''){
-       if (word.charAt(0).toLowerCase() === lastWord.slice(-1).toLowerCase() || lastWord === ""){
-            if (usedWords.includes(word.toLowerCase()) === false){
-                feedback.classList.remove('error');
+    if (currentTurn === "player"){
+        if (word !== ''){
+            if (word.charAt(0).toLowerCase() === lastWord.slice(-1).toLowerCase() || lastWord === ""){
+                if (usedWords.includes(word.toLowerCase()) === false){
+                    feedback.classList.remove('error');
 
-                feedback.textContent = ""
-                usedWords.push(word.toLowerCase())
-                lastWord = word.toLowerCase()
-                li.setAttribute("ID", 'worddesc');
+                    feedback.textContent = ""
+                    usedWords.push(word.toLowerCase())
+                    lastWord = word.toLowerCase()
+                    li.setAttribute("ID", 'worddesc');
 
-                li.innerHTML =
-                    word;
-                words.appendChild(li);
-                document.getElementById("word").value = '';
+                    li.innerHTML = word;
+                    words.appendChild(li);
+                    document.getElementById("word").value = '';
+
+                    document.getElementById('turnIndicator').textContent = "AI is thinking...";
+                    document.getElementById('turnIndicator').className = "ai-turn";
+                    CT();
+                    aiTurn();
+                }
+                else {
+                    feedback.classList.add('error');
+                    feedback.textContent = "Word already used"
+                }
             }
-            else {
+            else{
                 feedback.classList.add('error');
-                feedback.textContent = "Word already used"
+                feedback.textContent = "The starting letter of this word is different from the end letter of last word"
             }
         }
         else{
             feedback.classList.add('error');
-            feedback.textContent = "The starting letter of this word is different from the end letter of last word"
+            feedback.textContent = "Word is empty"
         }
-    }
-    else{
-        feedback.classList.add('error');
-        feedback.textContent = "Word is empty"
-    }
     
+    }
 }
 
 function Enter(event) {
     if (event.keyCode === 13) {
-        event.preventDefault();``
+        event.preventDefault();
         addWord();
     }
 }
@@ -70,15 +76,38 @@ async function test(letter){
 
     const available = possible.filter(w => !usedWords.includes(w.word.toLowerCase()));
     available.sort((a, b) => a.frequency - b.frequency);
-    let candidates = available.slice(Math.floor(available.length * 0.1), Math.floor(available.length * 0.3));
+    let candidates = available.slice(Math.floor(available.length * 0.2), Math.floor(available.length * 0.4));
     let pick = candidates[Math.floor(Math.random() * candidates.length)];
 
     return pick;
 }
 
-async function aiTurn(letter) {
-    let word = await test(letter);
-    console.log(word);
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function aiTurn() {
+    let lastLetter = lastWord.slice(-1).toLowerCase()
+    let word = await test(lastLetter);
+    var feedback = document.getElementById('feedback');
+    await wait(800);
+    if (word === undefined) {
+    feedback.textContent = "AI couldn't find a word you win!";
+        return;
+        }   
+    var li = document.createElement('li');
+    var words = document.getElementById('words');
+
+    usedWords.push(word.word.toLowerCase())
+    lastWord = word.word.toLowerCase()
+    li.setAttribute("ID", 'worddesc');
+
+    li.innerHTML = word.word;
+    words.appendChild(li);
+
+    CT();
+    document.getElementById('turnIndicator').textContent = "Your turn";
+    document.getElementById('turnIndicator').className = "player-turn";
 }
 
 document.getElementById('addBtn').addEventListener('click', addWord);
