@@ -12,7 +12,17 @@ function CT(){
     
 }
 
-function addWord() {
+async function isRealWord(word) {
+    try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        return res.status === 200;
+    } catch (error) {
+        console.log("Dictionary check failed:", error);
+        return false;
+    }
+}
+
+async function addWord() {
     var word = document.getElementById('word').value;
     var words = document.getElementById('words');
     var feedback = document.getElementById('feedback');
@@ -20,6 +30,7 @@ function addWord() {
     
     if (currentTurn === "player"){
         if (word !== ''){
+            if (await isRealWord(word) === true){
             if (word.charAt(0).toLowerCase() === lastWord.slice(-1).toLowerCase() || lastWord === ""){
                 if (usedWords.includes(word.toLowerCase()) === false){
                     feedback.classList.remove('error');
@@ -47,6 +58,7 @@ function addWord() {
                 feedback.classList.add('error');
                 feedback.textContent = "The starting letter of this word is different from the end letter of last word"
             }
+        }
         }
         else{
             feedback.classList.add('error');
@@ -90,7 +102,7 @@ async function aiTurn() {
     let lastLetter = lastWord.slice(-1).toLowerCase()
     let word = await test(lastLetter);
     var feedback = document.getElementById('feedback');
-    await wait(800);
+    await wait(1000);
     if (word === undefined) {
     feedback.textContent = "AI couldn't find a word you win!";
         return;
