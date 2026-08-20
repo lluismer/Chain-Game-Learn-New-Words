@@ -104,9 +104,14 @@ async function aiTurn() {
     var feedback = document.getElementById('feedback');
     await wait(1000);
     if (word === undefined) {
-    feedback.textContent = "AI couldn't find a word you win!";
+        feedback.textContent = "AI couldn't find a word you win!";
+        currentTurn = "over"
+        document.getElementById('turnIndicator').textContent = "You finally won this war";
+        document.getElementById('giveUpBtn').disabled = true;
+        document.getElementById('addBtn').disabled = true;
+        document.getElementById('word').disabled = true;
         return;
-        }   
+    }   
     var li = document.createElement('li');
     var words = document.getElementById('words');
 
@@ -122,6 +127,17 @@ async function aiTurn() {
     document.getElementById('turnIndicator').className = "player-turn";
 }
 
+function giveUp() {
+    currentTurn = "over"
+    document.getElementById('turnIndicator').textContent = "The AI won this battle, you can still win the war";
+    document.getElementById('giveUpBtn').disabled = true;
+    document.getElementById('addBtn').disabled = true;
+    document.getElementById('word').disabled = true;
+
+}
+
 document.getElementById('addBtn').addEventListener('click', addWord);
+
+document.getElementById('giveUpBtn').addEventListener('click', giveUp);
 
 document.getElementById("word").addEventListener("keydown", Enter);
